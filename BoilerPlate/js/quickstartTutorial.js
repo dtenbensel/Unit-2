@@ -20,13 +20,13 @@ var polygon = L.polygon([
     [51.51, -0.047]
 ]).addTo(map);
 
-marker.bindPopup("<strong>Hello world!</strong><br />I am a popup.").openPopup();
+marker.bindPopup("<strong>Waddup doe!!!</strong><br />I am a popup.").openPopup();
 circle.bindPopup("I am a circle.");
 polygon.bindPopup("I am a polygon.");
 
 var popup = L.popup()
-    .setLatLng([51.5, -0.09])
-    .setContent("I am a standalone popup.")
+    .setLatLng([51.5, -0.029])
+    .setContent("Marcus Thames River.")
     .openOn(map);
 
 var popup = L.popup();
