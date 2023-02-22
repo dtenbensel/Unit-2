@@ -15,7 +15,7 @@ function createMap(){
     }).addTo(map);
 
     //call getData function
-    getData();
+    getData(map);
 
 };
     
