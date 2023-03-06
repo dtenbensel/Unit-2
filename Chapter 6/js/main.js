@@ -49,6 +49,17 @@ function calcPropRadius(attValue) {
     return radius;
 };
 
+function createPopupContent(properties, attribute){
+    //build popup content string
+    var popupContent = "<p><b>School:</b> " + properties.School //+ "</p><p><b>" + attribute + ":</b> " + feature.properties[attribute] + "</p>";
+
+    //add formatted attribute to popup content string
+    var year = attribute//.split("_")[1];
+    popupContent += "<p><b>Enrollment in " + year + ":</b> " + properties[attribute];
+
+    return popupContent;
+};
+
     
 //Step 3: Add circle markers for point features to the map
 //function to convert markers to circle markers
@@ -79,6 +90,11 @@ function pointToLayer(feature, latlng, attributes){
 
     //build popup content string
     var popupContent = "<p><b>School:</b> " + feature.properties.School //+ "</p><p><b>" + attribute + ":</b> " + feature.properties[attribute] + "</p>";
+
+    //bind the popup to the circle marker
+    layer.bindPopup(popupContent, {
+        offset: new L.Point(0,-options.radius)
+    });
 
     //add formatted attribute to popup content string
     var year = attribute//.split("_")[1];
@@ -116,14 +132,10 @@ function updatePropSymbols(attribute){
             layer.setRadius(radius);
 
             //add city to popup content string
-            var popupContent = "<p><b>School:</b> " + props.School + "</p>";
+            var popupContent = createPopupContent(props, attribute);
 
-            //add formatted attribute to panel content string
-            var year = attribute//.split("_")[1];
-            popupContent += "<p><b>Enrollment in " + year + ":</b> " + props[attribute];
-
-            //update popup content            
-            popup = layer.getPopup();            
+            //update popup with new content
+            var popup = layer.getPopup();
             popup.setContent(popupContent).update();
         };
     });
