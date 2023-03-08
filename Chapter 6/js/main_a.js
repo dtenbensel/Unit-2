@@ -32,8 +32,11 @@ function calcStats(data){
               var value = school.properties[String(year)];
               //add value to array
               allValues.push(value);
+              console.log(allValues)
         }
     }
+    console.log(allValues)
+    console.log(year)
     //get min, max, mean stats for our array
     dataStats.min = Math.min(...allValues);
     dataStats.max = Math.max(...allValues);
@@ -68,7 +71,7 @@ function calcPropRadius(attValue) {
     //constant factor adjusts symbol sizes evenly
     var minRadius = 5;
     //Flannery Apperance Compensation formula
-    var radius = 1.0083 * Math.pow(attValue/dataStats.min,0.6) * minRadius
+    var radius = 1.0083 * Math.pow(attValue/dataStats.min,0.75) * minRadius
 
     return radius;
 };
@@ -111,15 +114,19 @@ function pointToLayer(feature, latlng, attributes){
     var layer = L.circleMarker(latlng, options);
 
     //build popup content string
-    var popupContent = new PopupContent(feature.properties, attribute)
+    var popupContent = "<p><b>School:</b> " + props.School + "</p>";
+
+
+
+    //var popupContent = new PopupContent(feature.properties, attribute)
 
     //create another popup based on the first
-    var popupContent2 = Object.create(popupContent);
+    //var popupContent2 = Object.create(popupContent);
 
     //change the formatting of popup 2
-    popupContent2.formatted = "<h2>" + popupContent.enrollment + " undergrads</h2>";
+    //popupContent2.formatted = "<h2>" + popupContent.enrollment + " undergrads</h2>";
 
-    console.log(popupContent.formatted) //original popup content
+    //console.log(popupContent.formatted) //original popup content
 
     //change the formatting
     //popupContent.formatted = "<h2>" + popupContent.enrollment + " undergrads</h2>";
@@ -147,7 +154,6 @@ function createPropSymbols(data, attributes){
 //update temporal legend
 //document.querySelector("span.year").innerHTML = year;
 
-//Step 10: Resize proportional symbols according to new attribute values
 function updatePropSymbols(attribute){
     map.eachLayer(function(layer){
         console.log("here!");
@@ -214,6 +220,45 @@ function createSequenceControls(attributes){
     });
 
     map.addControl(new SequenceControl());    // add listeners after adding control}
+
+    //replace button content with images
+    document.querySelector('#reverse').insertAdjacentHTML('beforeend',"<img src='img/L.png'>")
+    document.querySelector('#forward').insertAdjacentHTML('beforeend',"<img src='img/R.png'>")
+
+    //var steps = document.querySelectorAll('.step');
+
+    //Step 5: click listener for buttons
+    document.querySelectorAll('.step').forEach(function(step){
+        step.addEventListener("click", function(){
+            var index = document.querySelector('.range-slider').value;
+
+            //Step 6: increment or decrement depending on button clicked
+            if (step.id == 'forward'){
+                index++;
+                //Step 7: if past the last attribute, wrap around to first attribute
+                index = index > 6 ? 0 : index;
+            } else if (step.id == 'reverse'){
+                index--;
+                //Step 7: if past the first attribute, wrap around to last attribute
+                index = index < 0 ? 6 : index;
+            };
+
+            //Step 8: update slider
+            document.querySelector('.range-slider').value = index;
+
+            //Step 9: pass new attribute to update symbols
+            updatePropSymbols(attributes[index]);
+        })
+    })
+
+    //Step 5: input listener for slider
+    document.querySelector('.range-slider').addEventListener('input', function(){
+        //Step 6: get the new index value
+        var index = this.value;
+
+        //Step 9: pass new attribute to update symbols
+        updatePropSymbols(attributes[index]);
+    });
 };
 
 
@@ -231,7 +276,7 @@ function createLegend(attributes){
             container.innerHTML = '<p class="temporalLegend">Enrollment in <span class="year">1996</span></p>';
             
             //Step 1: start attribute legend svg string
-            var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+            var svg = '<svg id="attribute-legend" width="130px" height="80px">';
 
              //array of circle names to base loop on
             var circles = ["max", "mean", "min"];
@@ -244,7 +289,7 @@ function createLegend(attributes){
                 var cy = 130 - radius;  
 
                 //circle string  
-                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="65"/>';  
+                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#b2ff00" fill-opacity="0.8" stroke="#000000" cx="65"/>';  
         
                 //evenly space out labels            
                 var textY = i * 20 + 20;            

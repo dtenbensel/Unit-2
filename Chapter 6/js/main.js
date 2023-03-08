@@ -8,7 +8,7 @@ function createMap(){
     //create the map
     map = L.map('map', {
         center: [40.81, -96.7],
-        zoom: 4
+        zoom: 5
     });
 
     //add OSM base tilelayer
@@ -32,11 +32,8 @@ function calcStats(data){
               var value = school.properties[String(year)];
               //add value to array
               allValues.push(value);
-              console.log(allValues)
         }
     }
-    console.log(allValues)
-    console.log(year)
     //get min, max, mean stats for our array
     dataStats.min = Math.min(...allValues);
     dataStats.max = Math.max(...allValues);
@@ -71,7 +68,7 @@ function calcPropRadius(attValue) {
     //constant factor adjusts symbol sizes evenly
     var minRadius = 5;
     //Flannery Apperance Compensation formula
-    var radius = 1.0083 * Math.pow(attValue/dataStats.min,0.75) * minRadius
+    var radius = 1.2 * Math.pow(attValue/dataStats.min,0.75) * minRadius
 
     return radius;
 };
@@ -84,7 +81,7 @@ function PopupContent(properties, attribute){
     this.formatted = "<p><b>School:</b> " + this.properties.School + "<p><b>Enrollment in " + this.year + ":</b> " + this.enrollment + " undergrads</p>" ;
  
 };
-*/
+
     
 //Step 3: Add circle markers for point features to the map
 //function to convert markers to circle markers
@@ -114,19 +111,14 @@ function pointToLayer(feature, latlng, attributes){
     var layer = L.circleMarker(latlng, options);
 
     //build popup content string
-    var popupContent = "<p><b>School:</b> " + props.School + "</p>";
-
-
-
-    //var popupContent = new PopupContent(feature.properties, attribute)
-
+    var popupContent = new PopupContent(feature.properties, attribute)
     //create another popup based on the first
-    //var popupContent2 = Object.create(popupContent);
+   // var popupContent2 = Object.create(popupContent);
 
     //change the formatting of popup 2
     //popupContent2.formatted = "<h2>" + popupContent.enrollment + " undergrads</h2>";
 
-    //console.log(popupContent.formatted) //original popup content
+   // console.log(popupContent.formatted) //original popup content
 
     //change the formatting
     //popupContent.formatted = "<h2>" + popupContent.enrollment + " undergrads</h2>";
@@ -154,9 +146,11 @@ function createPropSymbols(data, attributes){
 //update temporal legend
 //document.querySelector("span.year").innerHTML = year;
 
+//Step 10: Resize proportional symbols according to new attribute values
 function updatePropSymbols(attribute){
     map.eachLayer(function(layer){
         console.log("here!");
+        document.querySelector("span.year").innerHTML = attribute;
         if (layer.feature && layer.feature.properties[attribute]){
             //access feature properties
             var props = layer.feature.properties;
@@ -220,6 +214,45 @@ function createSequenceControls(attributes){
     });
 
     map.addControl(new SequenceControl());    // add listeners after adding control}
+
+    //set slider attributes
+    document.querySelector(".range-slider").max = 6;
+    document.querySelector(".range-slider").min = 0;
+    document.querySelector(".range-slider").value = 0;
+    document.querySelector(".range-slider").step = 1;
+
+    //Step 5: click listener for buttons
+    document.querySelectorAll('.step').forEach(function(step){
+        step.addEventListener("click", function(){
+            var index = document.querySelector('.range-slider').value;
+
+            //Step 6: increment or decrement depending on button clicked
+            if (step.id == 'forward'){
+                index++;
+                //Step 7: if past the last attribute, wrap around to first attribute
+                index = index > 6 ? 0 : index;
+            } else if (step.id == 'reverse'){
+                index--;
+                //Step 7: if past the first attribute, wrap around to last attribute
+                index = index < 0 ? 6 : index;
+            };
+
+            //Step 8: update slider
+            document.querySelector('.range-slider').value = index;
+
+            //Step 9: pass new attribute to update symbols
+            updatePropSymbols(attributes[index]);
+        })
+    })
+
+    //Step 5: input listener for slider
+    document.querySelector('.range-slider').addEventListener('input', function(){
+        //Step 6: get the new index value
+        var index = this.value;
+
+        //Step 9: pass new attribute to update symbols
+        updatePropSymbols(attributes[index]);
+    });
 };
 
 
@@ -237,7 +270,7 @@ function createLegend(attributes){
             container.innerHTML = '<p class="temporalLegend">Enrollment in <span class="year">1996</span></p>';
             
             //Step 1: start attribute legend svg string
-            var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+            var svg = '<svg id="attribute-legend" width="130px" height="80px">';
 
              //array of circle names to base loop on
             var circles = ["max", "mean", "min"];
@@ -247,16 +280,16 @@ function createLegend(attributes){
 
                 //Step 3: assign the r and cy attributes  
                 var radius = calcPropRadius(dataStats[circles[i]]);  
-                var cy = 130 - radius;  
+                var cy = 50 - radius;  
 
                 //circle string  
-                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="65"/>';  
+                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#b2ff00" fill-opacity="0.8" stroke="#000000" cx="35"/>';  
         
                 //evenly space out labels            
-                var textY = i * 20 + 20;            
+                var textY = i * 15 + 20;            
 
                 //text string            
-                svg += '<text id="' + circles[i] + '-text" x="65" y="' + textY + '">' + Math.round(dataStats[circles[i]]*100)/100 + " million" + '</text>';
+                svg += '<text id="' + circles[i] + '-text" x="65" y="' + textY + '">' + Math.round(dataStats[circles[i]]*100/100)  + '</text>';
              };
 
             //close svg string

@@ -1,4 +1,4 @@
-#map { height: 500px; width:100%; display: inline-block; }
+#map { height: 700px; width:100%; display: inline-block; }
 
 .leaflet-popup-content p {
     margin: 0.2em 0;
@@ -44,7 +44,7 @@
 
 .legend-control-container {
     width: 150px;
-    height: 150px;
+    height: 90px;
     font-weight: bold;
     background-color:darkseagreen;
     opacity: 0.75;
