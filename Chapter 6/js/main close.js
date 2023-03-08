@@ -32,11 +32,8 @@ function calcStats(data){
               var value = school.properties[String(year)];
               //add value to array
               allValues.push(value);
-              console.log(allValues)
         }
     }
-    console.log(allValues)
-    console.log(year)
     //get min, max, mean stats for our array
     dataStats.min = Math.min(...allValues);
     dataStats.max = Math.max(...allValues);
@@ -71,7 +68,7 @@ function calcPropRadius(attValue) {
     //constant factor adjusts symbol sizes evenly
     var minRadius = 5;
     //Flannery Apperance Compensation formula
-    var radius = 1.0083 * Math.pow(attValue/dataStats.min,0.75) * minRadius
+    var radius = 1.0083 * Math.pow(attValue/dataStats.min,0.6) * minRadius
 
     return radius;
 };
@@ -84,7 +81,7 @@ function PopupContent(properties, attribute){
     this.formatted = "<p><b>School:</b> " + this.properties.School + "<p><b>Enrollment in " + this.year + ":</b> " + this.enrollment + " undergrads</p>" ;
  
 };
-*/
+
     
 //Step 3: Add circle markers for point features to the map
 //function to convert markers to circle markers
@@ -114,19 +111,15 @@ function pointToLayer(feature, latlng, attributes){
     var layer = L.circleMarker(latlng, options);
 
     //build popup content string
-    var popupContent = "<p><b>School:</b> " + props.School + "</p>";
-
-
-
-    //var popupContent = new PopupContent(feature.properties, attribute)
+    var popupContent = new PopupContent(feature.properties, attribute)
 
     //create another popup based on the first
-    //var popupContent2 = Object.create(popupContent);
+    var popupContent2 = Object.create(popupContent);
 
     //change the formatting of popup 2
-    //popupContent2.formatted = "<h2>" + popupContent.enrollment + " undergrads</h2>";
+    popupContent2.formatted = "<h2>" + popupContent.enrollment + " undergrads</h2>";
 
-    //console.log(popupContent.formatted) //original popup content
+    console.log(popupContent.formatted) //original popup content
 
     //change the formatting
     //popupContent.formatted = "<h2>" + popupContent.enrollment + " undergrads</h2>";
@@ -154,6 +147,7 @@ function createPropSymbols(data, attributes){
 //update temporal legend
 //document.querySelector("span.year").innerHTML = year;
 
+//Step 10: Resize proportional symbols according to new attribute values
 function updatePropSymbols(attribute){
     map.eachLayer(function(layer){
         console.log("here!");

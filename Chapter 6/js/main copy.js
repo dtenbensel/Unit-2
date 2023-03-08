@@ -238,6 +238,55 @@ function createSequenceControls(attributes){
 
 };
 
+function createLegend(attributes){
+    var LegendControl = L.Control.extend({
+        options: {
+            position: 'bottomright'
+        },
+
+        onAdd: function () {
+            // create the control container with a particular class name
+            var container = L.DomUtil.create('div', 'legend-control-container');
+
+            //PUT YOUR SCRIPT TO CREATE THE TEMPORAL LEGEND HERE
+            container.innerHTML = '<p class="temporalLegend">Enrollment in <span class="year">1996</span></p>';
+            
+            //Step 1: start attribute legend svg string
+            var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+
+             //array of circle names to base loop on
+            var circles = ["max", "mean", "min"];
+
+            //Step 2: loop to add each circle and text to svg string  
+            for (var i=0; i<circles.length; i++){  
+
+                //Step 3: assign the r and cy attributes  
+                var radius = calcPropRadius(dataStats[circles[i]]);  
+                var cy = 130 - radius;  
+
+                //circle string  
+                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="65"/>';  
+        
+                //evenly space out labels            
+                var textY = i * 20 + 20;            
+
+                //text string            
+                svg += '<text id="' + circles[i] + '-text" x="65" y="' + textY + '">' + Math.round(dataStats[circles[i]]*100)/100 + " million" + '</text>';
+             };
+
+            //close svg string
+            svg += "</svg>";
+
+            //add attribute legend svg to container
+            container.insertAdjacentHTML('beforeend',svg);
+            return container;
+            
+        }
+    });
+    map.addControl(new LegendControl());
+};
+
+
 //Step 2: Import GeoJSON data
 function getData(map){
     //load the data
@@ -253,6 +302,7 @@ function getData(map){
             //call function to create proportional symbols
             createPropSymbols(json, attributes);
             createSequenceControls(attributes);
+            createLegend(attributes);
         })
 
 }; 
