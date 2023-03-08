@@ -4,27 +4,28 @@
     margin: 0.2em 0;
 }
 
-#panel {    
-    width: 16%;    
-    padding: 20px;
-    display: inline-block;
-    vertical-align: top;
-    text-align: center;
-    line-height: 42px;
-}
+.sequence-control-container {  
+    width: 350px;  
+    height: 30px;  
+    background-color: rgba(255,255,255,0.8);  
+    padding: 10px;  
+    line-height: 45px;  
+    text-align: center;  
+    border: solid gray 1px;  
+}  
 
-.range-slider {
-    width: 55%;
-}
+.range-slider {  
+    width: 250px;  
+}  
 
-.step {
-	width: 20%;
-}
+.step {  
+    width: 40px;  
+}  
 
-.step img {
-	width: 100%;
-}
-
+.step img {  
+    width: 100%;  
+    height: auto;  
+} 
 
 #forward {
     float: right;

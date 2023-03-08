@@ -174,13 +174,6 @@ function createSequenceControls(attributes){
              //create range input element (slider)
              container.insertAdjacentHTML('beforeend', '<input class="range-slider" type="range">')
 
-            //add skip buttons
-            container.insertAdjacentHTML('beforeend', '<button class="step" id="reverse" title="Reverse"><img src="img/L.png"></button>'); 
-            container.insertAdjacentHTML('beforeend', '<button class="step" id="forward" title="Forward"><img src="img/R.png"></button>');
-
-            //disable any mouse event listeners for the container
-            L.DomEvent.disableClickPropagation(container);
-            
             return container;
         }
     });
@@ -188,6 +181,62 @@ function createSequenceControls(attributes){
     map.addControl(new SequenceControl());    // add listeners after adding control}
 };
 
+//Step 1: Create new sequence controls
+function createSequenceControls(attributes){
+    //create range input element (slider)
+    var slider = "<input class='range-slider' type='range'></input>";
+    document.querySelector("#panel").insertAdjacentHTML('beforeend',slider);
+
+    //set slider attributes
+    document.querySelector(".range-slider").max = 6;
+    document.querySelector(".range-slider").min = 0;
+    document.querySelector(".range-slider").value = 0;
+    document.querySelector(".range-slider").step = 1;
+
+    //below Example 3.6...add step buttons
+    document.querySelector('#panel').insertAdjacentHTML('beforeend','<button class="step" id="reverse">Reverse</button>');
+    document.querySelector('#panel').insertAdjacentHTML('beforeend','<button class="step" id="forward">Forward</button>');
+
+    //replace button content with images
+    document.querySelector('#reverse').insertAdjacentHTML('beforeend',"<img src='img/L.png'>")
+    document.querySelector('#forward').insertAdjacentHTML('beforeend',"<img src='img/R.png'>")
+
+    //var steps = document.querySelectorAll('.step');
+
+    //Step 5: click listener for buttons
+    document.querySelectorAll('.step').forEach(function(step){
+        step.addEventListener("click", function(){
+            var index = document.querySelector('.range-slider').value;
+
+            //Step 6: increment or decrement depending on button clicked
+            if (step.id == 'forward'){
+                index++;
+                //Step 7: if past the last attribute, wrap around to first attribute
+                index = index > 6 ? 0 : index;
+            } else if (step.id == 'reverse'){
+                index--;
+                //Step 7: if past the first attribute, wrap around to last attribute
+                index = index < 0 ? 6 : index;
+            };
+
+            //Step 8: update slider
+            document.querySelector('.range-slider').value = index;
+
+            //Step 9: pass new attribute to update symbols
+            updatePropSymbols(attributes[index]);
+        })
+    })
+
+    //Step 5: input listener for slider
+    document.querySelector('.range-slider').addEventListener('input', function(){
+        //Step 6: get the new index value
+        var index = this.value;
+
+        //Step 9: pass new attribute to update symbols
+        updatePropSymbols(attributes[index]);
+    });
+
+};
 
 //Step 2: Import GeoJSON data
 function getData(map){
