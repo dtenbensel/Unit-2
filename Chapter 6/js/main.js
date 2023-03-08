@@ -1,5 +1,6 @@
 //declare map var in global scope
 var map;
+var dataStats = {};
 var minValue;
 
 //function to instantiate the Leaflet map
@@ -20,6 +21,29 @@ function createMap(){
 
 };
 
+function calcStats(data){
+    //create empty array to store all data values
+    var allValues = [];
+    //loop through each city
+    for(var school of data.features){
+        //loop through each year
+        for(var year = 1996; year <= 2020; year+=4){
+              //get population for current year
+              var value = school.properties[String(year)];
+              //add value to array
+              allValues.push(value);
+        }
+    }
+    //get min, max, mean stats for our array
+    dataStats.min = Math.min(...allValues);
+    dataStats.max = Math.max(...allValues);
+    //calculate meanValue
+    var sum = allValues.reduce(function(a, b){return a+b;});
+
+    dataStats.mean = sum/ allValues.length;
+
+}    
+/*
 function calculateMinValue(data){
     //create empty array to store all data values
     var allValues = [];
@@ -38,13 +62,13 @@ function calculateMinValue(data){
 
     return minValue;
 }
-
+*/
 //calculate the radius of each proportional symbol
 function calcPropRadius(attValue) {
     //constant factor adjusts symbol sizes evenly
     var minRadius = 5;
     //Flannery Apperance Compensation formula
-    var radius = 1.0083 * Math.pow(attValue/minValue,0.5715) * minRadius
+    var radius = 1.0083 * Math.pow(attValue/dataStats.min,0.6) * minRadius
 
     return radius;
 };
@@ -119,6 +143,10 @@ function createPropSymbols(data, attributes){
     }).addTo(map);
 };
 
+
+//update temporal legend
+//document.querySelector("span.year").innerHTML = year;
+
 //Step 10: Resize proportional symbols according to new attribute values
 function updatePropSymbols(attribute){
     map.eachLayer(function(layer){
@@ -189,6 +217,54 @@ function createSequenceControls(attributes){
 };
 
 
+function createLegend(attributes){
+    var LegendControl = L.Control.extend({
+        options: {
+            position: 'bottomright'
+        },
+
+        onAdd: function () {
+            // create the control container with a particular class name
+            var container = L.DomUtil.create('div', 'legend-control-container');
+
+            //PUT YOUR SCRIPT TO CREATE THE TEMPORAL LEGEND HERE
+            container.innerHTML = '<p class="temporalLegend">Enrollment in <span class="year">1996</span></p>';
+            
+            //Step 1: start attribute legend svg string
+            var svg = '<svg id="attribute-legend" width="130px" height="130px">';
+
+             //array of circle names to base loop on
+            var circles = ["max", "mean", "min"];
+
+            //Step 2: loop to add each circle and text to svg string  
+            for (var i=0; i<circles.length; i++){  
+
+                //Step 3: assign the r and cy attributes  
+                var radius = calcPropRadius(dataStats[circles[i]]);  
+                var cy = 130 - radius;  
+
+                //circle string  
+                svg += '<circle class="legend-circle" id="' + circles[i] + '" r="' + radius + '"cy="' + cy + '" fill="#F47821" fill-opacity="0.8" stroke="#000000" cx="65"/>';  
+        
+                //evenly space out labels            
+                var textY = i * 20 + 20;            
+
+                //text string            
+                svg += '<text id="' + circles[i] + '-text" x="65" y="' + textY + '">' + Math.round(dataStats[circles[i]]*100)/100 + " million" + '</text>';
+             };
+
+            //close svg string
+            svg += "</svg>";
+
+            //add attribute legend svg to container
+            container.insertAdjacentHTML('beforeend',svg);
+            return container;
+            
+        }
+    });
+    map.addControl(new LegendControl());
+};
+
 //Step 2: Import GeoJSON data
 function getData(map){
     //load the data
@@ -199,11 +275,14 @@ function getData(map){
         .then(function(json){
             //create an attributes array
             var attributes = processData(json);
+            calcStats(json);
             //calculate minimum data value
-            minValue = calculateMinValue(json);
+            //minValue = calculateMinValue(json);
             //call function to create proportional symbols
             createPropSymbols(json, attributes);
             createSequenceControls(attributes);
+            createLegend(attributes);
+            
         })
 
 }; 
